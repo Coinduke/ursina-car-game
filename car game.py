@@ -1,12 +1,26 @@
+# import modules necessary for the code
 from ursina import *
+from random import *
 from ursina.prefabs.first_person_controller import FirstPersonController
-from numpy import round     # imports necessary modules
+from numpy import round
+from ursina.shaders import lit_with_shadows_shader 
 
 app = Ursina()  # set up the app
 
+pivot = Entity()
+
+Entity.default_shader = lit_with_shadows_shader
+
+# Add a directional light with shadows enabled
+DirectionalLight(parent=pivot, y=2, z=3, shadows=True, rotation=(30, 0, 0), shadow_map_resolution = Vec2(2048, 2048))
+
+# Add an ambient light to simulate bounce lighting and adjust its brightness
+AmbientLight(color=color.rgba(60, 60, 60, 0.1))
+
+
 def num_to_range(num, inMin, inMax, outMin, outMax):
   return outMin + (float(num - inMin) / float(inMax - inMin) * (outMax
-                  - outMin))   # makes a function that makes the number lerp
+                  - outMin))   # makes a function that makes the number lerp/ clamps it
 
 colliding = 0
 turn = 0
@@ -24,6 +38,7 @@ velocity = 0
 
 model = load_model('car.obj')
 texture = load_texture('cartex.png')
+
 
 randy = 0  # more variables and loads the models and textures of the car.
 
@@ -48,7 +63,8 @@ def update():
     car.rotation = carcam.rotation 
     car.y = carcam.y + 0.0625 + randy
     car.x = carcam.x + 1.5
-    car.z = carcam.z + 0.5                 # get camera to follow car and rotate with mouse or keyboard inputs
+    car.z = carcam.z + 0.5
+    #suspension_offset = randrange(0,2)               # get camera to follow car and rotate with mouse or keyboard inputs
 
     if car.intersects(ground).hit:  
         colliding= 1

@@ -15,7 +15,8 @@ Entity.default_shader = lit_with_shadows_shader
 DirectionalLight(parent=pivot, y=2, z=3, shadows=True, rotation=(30, 0, 0), shadow_map_resolution = Vec2(2048, 2048))
 
 # Add an ambient light to simulate bounce lighting and adjust its brightness
-AmbientLight(color=color.rgba(60, 60, 60, 0.1))
+AmbientLight(color=color.rgba(60, 60, 60, 0.1), shadows = True)
+
 
 
 def num_to_range(num, inMin, inMax, outMin, outMax):
@@ -64,7 +65,7 @@ def update():
     car.y = carcam.y + 0.0625 + randy
     car.x = carcam.x + 1.5
     car.z = carcam.z + 0.5
-    #suspension_offset = randrange(0,2)               # get camera to follow car and rotate with mouse or keyboard inputs
+    suspension_offset = uniform(0.0,0.01) * velocity             # get camera to follow car and rotate with mouse or keyboard inputs
 
     if car.intersects(ground).hit:  
         colliding= 1
@@ -75,8 +76,8 @@ def update():
     print_on_screen(text = printspeed, duration = 0.001, position = (0, 0.45)) # puts text on screem
 
 
-    if velocity <= -1.49129086168:  # sets a speed limit if car is in reverse
-        velocity = -1.49129086168
+    if velocity <= -3.49129086168:  # sets a speed limit if car is in reverse
+        velocity = -3.49129086168
 
     if carcam.y < -0.1 or held_keys['r']:     # checks if r is pressed and resets car position if it is
         carcam.position = (0,0,0)
@@ -88,24 +89,29 @@ def update():
         if not held_keys['s']:
             if not car.y >= 1:
                 velocity += 0.03
+                velocity *= 0.997
 
         else: velocity = velocity * 0.97
 
     else:
-        velocity = velocity * 0.999     # check if w is pressed and the brake isn't and adds velocity to the car, else it will make the car gradually slow down
+        if velocity > 0:
+            velocity = velocity - 0.001     # check if w is pressed and the brake isn't and adds velocity to the car, else it will make the car gradually slow down
     
     if held_keys['s']:
 
         if not held_keys['w']:
             if not car.y >= 1:
-                velocity -= 0.03
+                velocity -= 0.01
+                velocity *= 0.997
                 camera.z = 6.5-velocity
                 camera.rotation_y = 180  # checks if brake key is pressed, if it is car will slow, if w is pressed it won't slow, puts camera in reverse mode
 
         else: velocity = velocity * 0.97
 
     else:
-        velocity = velocity * 0.999
+         if velocity < 0:
+            velocity = velocity + 0.001
+
     if held_keys['a']:
         carcam.rotation_y -= (4 - velocity/2) * num_to_range(velocity, 0, 4, 0, 1)
         velocity /= 1.003
@@ -132,7 +138,7 @@ def update():
 
     wheel1.position += car.right * 0.65
     wheel1.position += car.back * 1
-    wheel1.y = 0.32
+    wheel1.y = 0.32 + suspension_offset
 
     wheel1.rotation_x = car.rotation_x  
     wheel1.rotation_y = car.rotation_y + 90
@@ -142,7 +148,7 @@ def update():
 
     wheel2.position += car.left * 0.65
     wheel2.position += car.back * 1
-    wheel2.y = 0.32
+    wheel2.y = 0.32 + suspension_offset
 
     wheel2.rotation_x = car.rotation_x  
     wheel2.rotation_y = car.rotation_y + 90
@@ -152,7 +158,7 @@ def update():
 
     wheel3.position += car.left * 0.65
     wheel3.position += car.forward * 1.45
-    wheel3.y = 0.32
+    wheel3.y = 0.32 + suspension_offset
 
     wheel3.rotation_x = car.rotation_x 
     wheel3.rotation_y = car.rotation_y + turnrate
@@ -162,7 +168,7 @@ def update():
 
     wheel4.position += car.right * 0.65
     wheel4.position += car.forward * 1.45
-    wheel4.y = 0.32
+    wheel4.y = 0.32 + suspension_offset
 
     wheel4.rotation_x = car.rotation_x 
     wheel4.rotation_y = car.rotation_y + turnrate
